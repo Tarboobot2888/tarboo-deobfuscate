@@ -1,6 +1,5 @@
 import { deobfuscate as webDeob } from 'webcrack';
 import { humanifyDecode, humanifyUnwrap } from 'humanify';
-import ivm from 'isolated-vm';
 import LRU from 'lru-cache';
 import { Buffer } from 'buffer';
 import crypto from 'crypto';
@@ -19,22 +18,6 @@ function decodeBase64(code) {
   }
 }
 
-async function runSandboxEval(code) {
-  const isolate = new ivm.Isolate({ memoryLimit: 128 });
-  const context = await isolate.createContext();
-  const jail = context.global;
-  await jail.set('global', jail.derefInto());
-  const script = await isolate.compileScript(`
-    let __result;
-    try {
-      __result = (function(){ return eval(\`\${code}\`); })();
-    } catch(e) { __result = null; }
-    __result;
-  `);
-  const result = await script.run(context, { timeout: 100, memoryLimit: 32 });
-  return result ? result.toString() : null;
-}
-
 export default async function handler(req, res) {
   if (req.method !== 'POST')
     return res.status(405).json({ error: 'Method not allowed' });
@@ -46,13 +29,18 @@ export default async function handler(req, res) {
   const base64Decoded = decodeBase64(code);
   const key = sha256(base64Decoded);
   if (cache.has(key)) {
-    const val = cache.get(key);
-    return res.status(200).json({ ...val, cached: true });
+    return res.status(200).json({ ...cache.get(key), cached: true });
   }
 
-  let webRes, humRes, sbRes;
+  let webRes, humRes;
   try {
-    webRes = await webDeob(base64Decoded);
+    webRes = await webDeob(base64Decoded, {
+      transforms: [
+        'string-array','array-rotator','decoder','inline-decoded-strings',
+        'inline-decoder-wrappers','inline-object-props','merge-strings',
+        'dead-code','control-flow-object','control-flow-switch','unminify'
+      ]
+    });
   } catch (e) {
     webRes = { code: base64Decoded, error: e.message };
   }
@@ -63,19 +51,9 @@ export default async function handler(req, res) {
     humRes = { code: webRes.code, error: e.message };
   }
 
-  try {
-    sbRes = await runSandboxEval(humRes.code);
-  } catch (e) {
-    sbRes = null;
-  }
-
   const deobfuscated = humRes.code || webRes.code;
   const unminified = deobfuscated;
-  const smartAnalysis = {
-    webcrack: webRes,
-    humanify: humRes,
-    sandboxEval: sbRes,
-  };
+  const smartAnalysis = { webcrack: webRes, humanify: humRes };
 
   const response = { base64Decoded, deobfuscated, unminified, smartAnalysis };
   cache.set(key, response);
