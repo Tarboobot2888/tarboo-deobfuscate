@@ -1,20 +1,17 @@
 // lib/openai.ts
 import axios from "axios";
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+// مفتاح OpenAI مكتوب مباشرة داخل الكود
+const OPENAI_API_KEY = "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";
 
 export async function deobfuscateWithOpenAI(code: string): Promise<string> {
-  if (!OPENAI_API_KEY) {
-    throw new Error("OpenAI API key not configured");
-  }
-
-  const prompt = `
+  const prompt = \`
 فك شفرة هذا الكود المشفر بجافاسكريبت node.js، وأعد كتابته بشكل واضح ومنسق:
 
-${code}
+\${code}
 
 أعد كتابة الكود المفكوك فقط بدون شرح.
-`;
+\`;
 
   try {
     const response = await axios.post(
@@ -28,7 +25,7 @@ ${code}
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          Authorization: \`Bearer \${OPENAI_API_KEY}\`,
         },
       }
     );
