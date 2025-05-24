@@ -48,7 +48,9 @@ export function inlineVariable(
 
     for (const ref of binding.referencePaths) {
       const assignment = getNearestAssignment(ref.node.start!);
-      if (assignment) ref.replaceWith(assignment.right);
+      if (assignment && assignment.type === "AssignmentExpression") {
+  ref.replaceWith((assignment as t.AssignmentExpression).right);
+}
     }
 
     for (const path of binding.constantViolations) {
