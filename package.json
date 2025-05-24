@@ -28,6 +28,7 @@
     "@types/react": "18.2.7",
     "@types/babel__generator": "^7.6.7",
     "@types/babel__traverse": "^7.18.2",
-    "vitest": "^1.4.0"
+    "vitest": "^1.4.0",
+    "@types/debug": "^4.1.12"
   }
 }
