@@ -12,7 +12,8 @@ import {
   generate,
 } from './ast-utils';
 import type { Sandbox } from './deobfuscate';
-import deobfuscate, {
+import {
+  default as deobfuscate,
   createBrowserSandbox,
   createNodeSandbox,
 } from './deobfuscate';
