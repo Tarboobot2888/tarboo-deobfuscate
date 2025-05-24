@@ -1,15 +1,12 @@
 // lib/webcrack.ts
-import { webcrack } from "webcrack";
+import { transform } from "./webcrack/index"; // مسار النسخة المحلية
 
 export async function deobfuscateLocal(code: string): Promise<string> {
   try {
-    const result = await webcrack(code, {
-      mangleRegex: null,
-      sandbox: undefined,
-      onProgress: () => {}
-    });
+    const result = await transform(code); // استخدم الدالة الرئيسية
     return result.code;
   } catch (error) {
-    throw new Error("Local deobfuscation failed: " + error);
+    console.error("WebCrack Error:", error);
+    return "فشل فك التشفير باستخدام WebCrack المحلي.";
   }
 }
