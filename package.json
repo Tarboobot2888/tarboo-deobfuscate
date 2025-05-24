@@ -1,14 +1,15 @@
 {
-  "name": "tarboo-deobfuscate-nojslinux",
-  "version": "1.0.0",
-  "scripts": {
-    "start": "vercel dev"
-  },
-  "dependencies": {
-    "webcrack": "^1.1.3",
-    "humanify": "^2.0.0",
-    "isolated-vm": "^3.0.0",
-    "lru-cache": "^10.0.0",
-    "buffer": "^6.0.3"
-  }
+   "name": "tarboo-deobfuscate",
+   "version": "1.0.0",
+   "dependencies": {
+-    "webcrack": "^1.1.3",
+-    "humanify": "^2.0.0",
+-    "isolated-vm": "^3.0.0",
+-    "lru-cache": "^10.0.0",
+-    "buffer": "^6.0.3"
++    "webcrack": "^1.1.3",
++    "humanify": "^2.0.0",
++    "lru-cache": "^10.0.0",
++    "buffer": "^6.0.3"
+   }
 }
