@@ -1,17 +1,17 @@
 // lib/openai.ts
 import axios from "axios";
 
-// مفتاح OpenAI مكتوب مباشرة داخل الكود
+// مفتاح OpenAI مباشر
 const OPENAI_API_KEY = "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";
 
 export async function deobfuscateWithOpenAI(code: string): Promise<string> {
-  const prompt = \`
+  const prompt = `
 فك شفرة هذا الكود المشفر بجافاسكريبت node.js، وأعد كتابته بشكل واضح ومنسق:
 
-\${code}
+${code}
 
 أعد كتابة الكود المفكوك فقط بدون شرح.
-\`;
+  `;
 
   try {
     const response = await axios.post(
@@ -25,14 +25,13 @@ export async function deobfuscateWithOpenAI(code: string): Promise<string> {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: \`Bearer \${OPENAI_API_KEY}\`,
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
         },
       }
     );
 
-    const text = response.data.choices[0].message.content;
-    return text;
-  } catch (error) {
-    throw new Error("OpenAI deobfuscation failed: " + error);
+    return response.data.choices[0].message.content || "لم يتم فك التشفير.";
+  } catch (error: any) {
+    return "حدث خطأ أثناء استخدام OpenAI: " + (error.message || "غير معروف");
   }
 }
