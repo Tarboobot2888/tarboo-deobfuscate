@@ -1,11 +1,12 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/deobfuscate.js", "use": "@vercel/node" },
-    { "src": "public/index.html", "use": "@vercel/static" }
+    {
+      "src": "next.config.js",
+      "use": "@vercel/next"
+    }
   ],
-  "routes": [
-    { "src": "/", "dest": "public/index.html" },
-    { "src": "/api/(.*)", "dest": "/api/deobfuscate.js" }
-  ]
+  "env": {
+    "OPENAI_API_KEY": "@openai_api_key"
+  }
 }
