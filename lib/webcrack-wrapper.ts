@@ -1,15 +1,9 @@
 // lib/webcrack-wrapper.ts
 import { parse } from '@babel/parser';
-import traverse from '@babel/traverse';
 import generate from '@babel/generator';
-import * as t from '@babel/types';
-
-import deobfuscate from "./webcrack/index"; // default import
+import type { TransformState } from './webcrack/types'; // افترض وجود هذا النوع
+import deobfuscate from './webcrack/index'; // default export
 import { createNodeSandbox } from './webcrack/deobfuscate/vm';
-
-interface TransformState {
-  changes: number;
-}
 
 export async function deobfuscateLocal(code: string): Promise<string> {
   try {
