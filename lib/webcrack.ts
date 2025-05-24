@@ -1,5 +1,5 @@
 // lib/webcrack.ts
-import deobfuscate from "./webcrack"; // default export from index.ts
+import { deobfuscate } from "./webcrack"; // استيراد صحيح
 
 export async function deobfuscateLocal(code: string): Promise<string> {
   try {
