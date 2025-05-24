@@ -234,4 +234,4 @@ export async function webcrack(
 }
 
 import deobfuscate from "./deobfuscate";
-export { deobfuscate };
+export default deobfuscate;
