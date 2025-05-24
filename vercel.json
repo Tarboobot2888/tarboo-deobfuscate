@@ -6,7 +6,14 @@
       "use": "@vercel/next"
     }
   ],
-  "env": {
-    "OPENAI_API_KEY": "@OPENAI_API_KEY"
-  }
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index"
+    }
+  ]
 }
