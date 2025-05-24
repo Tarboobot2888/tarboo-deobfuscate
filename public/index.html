@@ -3,161 +3,78 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TARBOO Deobfuscate</title>
+  <title>TARBOO Deobfuscate - Ultimate</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
-    body {
-      background: #0f0f14;
-      color: #00ff99;
-      font-family: 'Share Tech Mono', monospace;
-      margin: 0; padding: 20px;
-      display: flex; flex-direction: column; align-items: center;
-      min-height: 100vh;
-    }
-    h1 {
-      margin-bottom: 20px;
-      font-weight: bold;
-      letter-spacing: 2px;
-      text-shadow: 0 0 8px #00ff99;
-    }
-    textarea {
-      background: #121212;
-      border: 1px solid #00ff99;
-      color: #00ff99;
-      width: 90vw;
-      max-width: 900px;
-      height: 220px;
-      padding: 10px;
-      font-family: monospace;
-      font-size: 16px;
-      resize: vertical;
-      margin-bottom: 10px;
-      outline: none;
-    }
-    button {
-      background: #00ff99;
-      border: none;
-      color: #0f0f14;
-      font-weight: bold;
-      font-size: 18px;
-      padding: 12px 30px;
-      cursor: pointer;
-      border-radius: 6px;
-      margin-bottom: 20px;
-      transition: background 0.3s ease;
-    }
-    button:hover {
-      background: #00cc7a;
-    }
-    .tabs {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 10px;
-    }
-    .tab {
-      cursor: pointer;
-      padding: 8px 18px;
-      border: 1px solid #00ff99;
-      border-radius: 6px;
-      background: #121212;
-      color: #00ff99;
-      transition: background 0.3s ease;
-    }
-    .tab.active, .tab:hover {
-      background: #00ff99;
-      color: #0f0f14;
-    }
-    .output {
-      background: #121212;
-      border: 1px solid #00ff99;
-      border-radius: 6px;
-      padding: 15px;
-      width: 90vw;
-      max-width: 900px;
-      min-height: 180px;
-      font-family: monospace;
-      white-space: pre-wrap;
-      overflow-x: auto;
-    }
+    body { background:#0f0f14; color:#00ff99; font-family:'Share Tech Mono', monospace; margin:0; padding:20px; display:flex; flex-direction:column; align-items:center; }
+    h1 { text-shadow:0 0 8px #00ff99; margin-bottom:20px; }
+    .container { width:90vw; max-width:900px; }
+    textarea { background:#121212; border:1px solid #00ff99; color:#00ff99; width:100%; height:200px; padding:10px; font-family:monospace; font-size:16px; margin-bottom:10px; }
+    button { background:#00ff99; border:none; color:#0f0f14; padding:12px 30px; font-size:18px; border-radius:6px; position:relative; }
+    button:hover { background:#00cc7a; }
+    .spinner { border:3px solid #121212; border-top:3px solid #00ff99; border-radius:50%; width:18px; height:18px; animation:spin 1s linear infinite; position:absolute; left:15px; top:50%; transform:translateY(-50%); display:none; }
+    @keyframes spin {100%{transform:rotate(360deg);} }
+    .tabs { display:flex; justify-content:center; gap:10px; margin-bottom:10px; }
+    .tab { padding:6px 12px; border:1px solid #00ff99; border-radius:6px; cursor:pointer; }
+    .tab.active, .tab:hover { background:#00ff99; color:#0f0f14; }
+    .output { background:#121212; border:1px solid #00ff99; border-radius:6px; padding:10px; width:100%; min-height:150px; overflow-x:auto; margin-bottom:10px; }
+    .copy-btn { float:left; background:#121212; border:1px solid #00ff99; border-radius:4px; padding:4px 8px; cursor:pointer; margin-bottom:6px; }
+    .copy-btn:hover { background:#00cc7a; }
   </style>
 </head>
 <body>
-
-  <h1>TARBOO Deobfuscate</h1>
-
-  <textarea id="inputCode" placeholder="ألصق كود Node.js المشفر هنا..."></textarea>
-  <button id="runBtn">فك التشفير</button>
-
-  <div class="tabs">
-    <div class="tab active" data-tab="base64">Base64</div>
-    <div class="tab" data-tab="deobf">فك التمويه</div>
-    <div class="tab" data-tab="unmin">تنسيق الكود</div>
+  <h1>TARBOO Deobfuscate - Ultimate</h1>
+  <div class="container">
+    <textarea id="inputCode" placeholder="ألصق كود Node.js المشفر هنا..."></textarea>
+    <button id="runBtn"><div class="spinner" id="spinner"></div>فك التشفير</button>
+    <div class="tabs">
+      <div class="tab active" data-tab="base64">Base64</div>
+      <div class="tab" data-tab="deobf">فك التمويه</div>
+      <div class="tab" data-tab="unmin">تنسيق</div>
+      <div class="tab" data-tab="smart">التحليل الذكي</div>
+    </div>
+    <div id="base64" class="output"><button class="copy-btn" data-target="base64">نسخ</button><pre class="language-js" id="pre-base64"></pre></div>
+    <div id="deobf" class="output" style="display:none;"><button class="copy-btn" data-target="deobf">نسخ</button><pre class="language-js" id="pre-deobf"></pre></div>
+    <div id="unmin" class="output" style="display:none;"><button class="copy-btn" data-target="unmin">نسخ</button><pre class="language-js" id="pre-unmin"></pre></div>
+    <div id="smart" class="output" style="display:none;"><button class="copy-btn" data-target="smart">نسخ JSON</button><pre class="language-json" id="pre-smart"></pre></div>
   </div>
-
-  <pre id="base64" class="output"></pre>
-  <pre id="deobf" class="output" style="display:none;"></pre>
-  <pre id="unmin" class="output" style="display:none;"></pre>
-
-<script>
-  const tabs = document.querySelectorAll('.tab');
-  const outputs = {
-    base64: document.getElementById('base64'),
-    deobf: document.getElementById('deobf'),
-    unmin: document.getElementById('unmin')
-  };
-
-  tabs.forEach(tab => {
-    tab.onclick = () => {
-      tabs.forEach(t => t.classList.remove('active'));
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const areas = ['base64','deobf','unmin','smart'];
+    tabs.forEach(tab=>tab.onclick=()=>{
+      tabs.forEach(t=>t.classList.remove('active'));
       tab.classList.add('active');
-      for (const key in outputs) outputs[key].style.display = 'none';
-      outputs[tab.dataset.tab].style.display = 'block';
-    };
-  });
-
-  document.getElementById('runBtn').onclick = async () => {
-    const input = document.getElementById('inputCode').value.trim();
-    if (!input) {
-      alert('يرجى إدخال كود لفك التشفير');
-      return;
-    }
-    outputs.base64.textContent = 'جارٍ المعالجة...';
-    outputs.deobf.textContent = '';
-    outputs.unmin.textContent = '';
-
-    try {
-      const response = await fetch('/api/deobfuscate', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({code: input})
-      });
-      const result = await response.json();
-
-      if (result.error) {
-        outputs.base64.textContent = `خطأ: ${result.error}`;
-        outputs.deobf.textContent = '';
-        outputs.unmin.textContent = '';
-      } else {
-        outputs.base64.textContent = result.base64Decoded;
-        outputs.deobf.textContent = result.deobfuscated;
-        outputs.unmin.textContent = result.unminified;
-
-        // افتح تبويب فك التمويه تلقائيًا
-        tabs.forEach(t => t.classList.remove('active'));
-        tabs[1].classList.add('active');
-        outputs.base64.style.display = 'none';
-        outputs.deobf.style.display = 'block';
-        outputs.unmin.style.display = 'none';
+      areas.forEach(a=>document.getElementById(a).style.display = a===tab.dataset.tab?'block':'none');
+    });
+    document.querySelectorAll('.copy-btn').forEach(btn=>{
+      btn.onclick=()=>{
+        const t=btn.getAttribute('data-target');
+        navigator.clipboard.writeText(document.getElementById('pre-'+t).textContent);
+      };
+    });
+    const spinner = document.getElementById('spinner');
+    document.getElementById('runBtn').onclick = async ()=>{
+      const code = document.getElementById('inputCode').value.trim();
+      if(!code) return alert('يرجى إدخال كود!');
+      spinner.style.display='block';
+      try {
+        const res = await fetch('/api/deobfuscate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
+        const j = await res.json();
+        spinner.style.display='none';
+        if(j.error) return alert(j.error);
+        document.getElementById('pre-base64').textContent = j.base64Decoded;
+        document.getElementById('pre-deobf').textContent = j.deobfuscated;
+        document.getElementById('pre-unmin').textContent = j.unminified;
+        document.getElementById('pre-smart').textContent = JSON.stringify(j.smartAnalysis, null, 2);
+        Prism.highlightAll();
+        tabs[3].click();
+      }catch(e){
+        spinner.style.display='none';
+        alert('خطأ: '+e.message);
       }
-    } catch (e) {
-      outputs.base64.textContent = 'حدث خطأ أثناء الاتصال بالخادم.';
-      outputs.deobf.textContent = '';
-      outputs.unmin.textContent = '';
-    }
-  };
-</script>
-
+    };
+  </script>
 </body>
 </html>
