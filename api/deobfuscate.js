@@ -3,18 +3,38 @@ import * as acorn from 'acorn';
 import { simple as walkSimple } from 'acorn-walk';
 import * as escodegen from 'escodegen';
 
-// خوارزمية Base64 فك الترميز
+// محاولة فك Base64 مع ترميزات مختلفة وتنقية النص
 function decodeBase64(code) {
+  let decoded = code;
   try {
-    return Buffer.from(code, 'base64').toString('utf-8');
+    // محاولة فك بـ UTF-8
+    decoded = Buffer.from(code, 'base64').toString('utf-8');
+    if (!isMostlyReadable(decoded)) {
+      // لو النص غير مقروء بشكل كافي جرب UTF-16LE
+      decoded = Buffer.from(code, 'base64').toString('utf16le');
+    }
   } catch {
-    return code;
+    // إذا فشل فك Base64 نرجع النص الأصلي
+    decoded = code;
   }
+  // تنظيف النص من الأحرف غير القابلة للطباعة
+  return cleanNonPrintable(decoded);
 }
 
-// خوارزمية إزالة أسماء المتغيرات المشوشة مثل _0x1234...
+// تحقق من نسبة الأحرف المقروءة (ASCII وطباعة)
+function isMostlyReadable(text) {
+  if (!text || text.length === 0) return false;
+  const readableChars = text.match(/[\x20-\x7E]/g) || [];
+  return (readableChars.length / text.length) > 0.7; // 70% مقروء
+}
+
+// إزالة أو استبدال الأحرف غير القابلة للطباعة في النص
+function cleanNonPrintable(text) {
+  return text.replace(/[^\x09\x0A\x0D\x20-\x7E]/g, ''); // إزالة غير ASCII
+}
+
+// إزالة أسماء المتغيرات المشوشة مثل _0x1234...
 function deobfuscateNames(code) {
-  // استبدال أسماء المتغيرات المشفرة بأسماء عامة
   return code.replace(/_0x[a-f0-9]{4,}/g, (match, idx) => `var_${idx}`);
 }
 
@@ -24,37 +44,31 @@ function simplifyAST(code) {
   try {
     ast = acorn.parse(code, { ecmaVersion: 'latest' });
   } catch {
-    return code; // إذا لم يمكن التحليل، نرجع الكود كما هو
+    return code;
   }
 
-  // مثال: إزالة تعبيرات لا تؤثر على التنفيذ (dead code)
-  // لنفترض أن remove dead code بسيط هنا
-  // لكن بشكل متقدم يمكن إضافة المزيد
-  // هذا مثال مبدئي فقط
+  // مثال مبدئي: إزالة بعض التعبيرات، يمكن تطويرها لاحقًا
   walkSimple(ast, {
     Literal(node) {
-      if (typeof node.value === 'string' && node.value.match(/^\\x[a-f0-9]{2}$/)) {
-        // لا نفعل شيء هنا لكن يمكن التوسع
+      if (typeof node.value === 'string' && node.value.match(/^\\\\x[a-f0-9]{2}$/)) {
+        // لا تعديل الآن لكن مجال للتطوير
       }
     }
   });
 
-  // إعادة توليد الكود من AST بعد التعديلات
   return escodegen.generate(ast);
 }
 
-// تنسيق الكود (unminify) بإضافة فواصل الأسطر والمسافات
+// تنسيق الكود ليكون مقروءاً
 function unminify(code) {
-  // بديل أفضل من التعويض النصي البسيط
   try {
     let ast = acorn.parse(code, { ecmaVersion: 'latest' });
-    return escodegen.generate(ast, { format: { indent: { style: '  ' }, newline: '\n' } });
+    return escodegen.generate(ast, { format: { indent: { style: '  ' }, newline: '\\n' } });
   } catch {
-    // لو فشل التحليل، استخدم بديل بسيط
     return code
-      .replace(/;/g, ';\n')
-      .replace(/{/g, '{\n')
-      .replace(/}/g, '\n}');
+      .replace(/;/g, ';\\n')
+      .replace(/{/g, '{\\n')
+      .replace(/}/g, '\\n}');
   }
 }
 
@@ -64,16 +78,9 @@ export default async function handler(req, res) {
   const { code } = req.body;
   if (!code) return res.status(400).json({ error: 'Code is required' });
 
-  // 1. فك ترميز Base64 إذا كان ممكناً
   let base64Decoded = decodeBase64(code);
-
-  // 2. فك التمويه بإزالة أسماء المتغيرات المشوشة
   let deobfuscated = deobfuscateNames(base64Decoded);
-
-  // 3. استخدام AST لتحسين الكود وإزالة التشويش
   deobfuscated = simplifyAST(deobfuscated);
-
-  // 4. تنسيق الكود ليكون مقروءاً
   let unminified = unminify(deobfuscated);
 
   return res.status(200).json({
