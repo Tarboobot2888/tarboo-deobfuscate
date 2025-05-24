@@ -1,0 +1,14 @@
+{
+  "name": "tarboo-deobfuscate",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "acorn": "^8.8.2",
+    "acorn-walk": "^8.2.0",
+    "escodegen": "^2.0.0",
+    "buffer": "^6.0.3"
+  }
+}
