@@ -1,15 +1,14 @@
-// lib/webcrack-wrapper.ts
 import { parse } from '@babel/parser';
 import generate from '@babel/generator';
-import type { TransformState } from './webcrack/types'; // افترض وجود هذا النوع
-import deobfuscate from './webcrack/index'; // default export
+import type { TransformState } from './webcrack/types';
+import deobfuscate from './webcrack';
 import { createNodeSandbox } from './webcrack/deobfuscate/vm';
 
 export async function deobfuscateLocal(code: string): Promise<string> {
   try {
     const ast = parse(code, {
       sourceType: 'unambiguous',
-      plugins: ['jsx', 'typescript']
+      plugins: ['jsx', 'typescript'],
     });
 
     const state: TransformState = { changes: 0 };
@@ -17,8 +16,7 @@ export async function deobfuscateLocal(code: string): Promise<string> {
 
     await deobfuscate.run(ast, state, sandbox);
 
-    const output = generate(ast, { comments: false }).code;
-    return output;
+    return generate(ast, { comments: false }).code;
   } catch (error) {
     console.error("WebCrack Error:", error);
     return "حدث خطأ أثناء فك التشفير باستخدام WebCrack المحلي.";
