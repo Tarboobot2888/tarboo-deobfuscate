@@ -12,10 +12,10 @@ export function createNodeSandbox(): Sandbox {
   return async (code: string) => {
     const {
       default: { Isolate },
-    } = await import('isolated-vm');
-    const isolate = new Isolate();
-    const context = await isolate.createContext();
-    const result = (await context.eval(code, {
+    } = await import { VM } from 'vm2';
+    // replaced isolated-vm usage with vm2;
+    // context creation not required in vm2;
+    const result = (vm.run(code, {
       timeout: 10_000,
       copy: true,
       filename: 'file:///obfuscated.js',
