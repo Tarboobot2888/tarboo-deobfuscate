@@ -232,3 +232,5 @@ export async function webcrack(
     },
   };
 }
+
+export { deobfuscate } from "./deobfuscate";
