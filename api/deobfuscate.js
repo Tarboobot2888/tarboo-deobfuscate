@@ -1,6 +1,6 @@
 import { deobfuscate as webDeob } from 'webcrack';
 import { humanifyDecode, humanifyUnwrap } from 'humanify';
-import { parse as jslParse, transform as jslTransform } from 'jslinux-deobfuscator';
+import { parse as jslParse, transform as jslTransform } from './jslinux';
 import ivm from 'isolated-vm';
 import LRU from 'lru-cache';
 import { Buffer } from 'buffer';
