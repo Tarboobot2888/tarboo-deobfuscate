@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { code } = req.body;
+  const { code } = (req as any).body;
 
   if (!code) {
     return res.status(400).json({ error: "Code is required" });
