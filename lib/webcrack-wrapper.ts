@@ -1,8 +1,11 @@
 import { parse } from '@babel/parser';
 import generate from '@babel/generator';
-import type { TransformState } from './webcrack/types';
 import deobfuscate from './webcrack';
 import { createNodeSandbox } from './webcrack/deobfuscate/vm';
+
+type TransformState = {
+  changes: number;
+};
 
 export async function deobfuscateLocal(code: string): Promise<string> {
   try {
@@ -18,7 +21,7 @@ export async function deobfuscateLocal(code: string): Promise<string> {
 
     return generate(ast, { comments: false }).code;
   } catch (error) {
-    console.error("WebCrack Error:", error);
-    return "حدث خطأ أثناء فك التشفير باستخدام WebCrack المحلي.";
+    console.error('WebCrack Error:', error);
+    return 'حدث خطأ أثناء فك التشفير باستخدام WebCrack المحلي.';
   }
 }
