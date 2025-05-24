@@ -1,20 +1,25 @@
 import { deobfuscate as webDeob } from 'webcrack';
 import { humanifyDecode, humanifyUnwrap } from 'humanify';
-import { parse as jslParse, transform as jslTransform } from './jslinux';
 import ivm from 'isolated-vm';
 import LRU from 'lru-cache';
 import { Buffer } from 'buffer';
 import crypto from 'crypto';
 
-const cache = new LRU({ max: 300, ttl: 1000*60*15 });
+const cache = new LRU({ max: 300, ttl: 1000 * 60 * 15 });
 
-function sha256(text){return crypto.createHash('sha256').update(text).digest('hex');}
-function decodeBase64(code){
-  try {return Buffer.from(code,'base64').toString('utf-8');}
-  catch{return code;}
+function sha256(text) {
+  return crypto.createHash('sha256').update(text).digest('hex');
 }
 
-async function runSandboxEval(code){
+function decodeBase64(code) {
+  try {
+    return Buffer.from(code, 'base64').toString('utf-8');
+  } catch {
+    return code;
+  }
+}
+
+async function runSandboxEval(code) {
   const isolate = new ivm.Isolate({ memoryLimit: 128 });
   const context = await isolate.createContext();
   const jail = context.global;
@@ -30,47 +35,49 @@ async function runSandboxEval(code){
   return result ? result.toString() : null;
 }
 
-export default async function handler(req,res){
-  if(req.method!=='POST') return res.status(405).json({error:'Method not allowed'});
+export default async function handler(req, res) {
+  if (req.method !== 'POST')
+    return res.status(405).json({ error: 'Method not allowed' });
   const { code } = req.body;
-  if(!code) return res.status(400).json({error:'Code is required'});
-  if(code.length>2000000) return res.status(413).json({error:'Code too large'});
+  if (!code) return res.status(400).json({ error: 'Code is required' });
+  if (code.length > 2000000)
+    return res.status(413).json({ error: 'Code too large' });
 
   const base64Decoded = decodeBase64(code);
   const key = sha256(base64Decoded);
-  if(cache.has(key)){
+  if (cache.has(key)) {
     const val = cache.get(key);
-    return res.status(200).json({...val, cached:true});
+    return res.status(200).json({ ...val, cached: true });
   }
 
-  let webRes, humRes, jslRes, sbRes;
-  try{
+  let webRes, humRes, sbRes;
+  try {
     webRes = await webDeob(base64Decoded);
-  } catch(e){ webRes = { code: base64Decoded, error: e.message }; }
+  } catch (e) {
+    webRes = { code: base64Decoded, error: e.message };
+  }
 
-  try{
+  try {
     humRes = humanifyUnwrap(await humanifyDecode(base64Decoded));
-  } catch(e){ humRes = { code: webRes.code, error: e.message }; }
+  } catch (e) {
+    humRes = { code: webRes.code, error: e.message };
+  }
 
-  try{
-    jslRes = jslTransform(jslParse(humRes.code));
-  } catch(e){ jslRes = { code: humRes.code, error: e.message }; }
+  try {
+    sbRes = await runSandboxEval(humRes.code);
+  } catch (e) {
+    sbRes = null;
+  }
 
-  try{
-    sbRes = await runSandboxEval(jslRes.code);
-  } catch(e){ sbRes = null; }
-
-  // merge results
-  const deobfuscated = jslRes.code;
+  const deobfuscated = humRes.code || webRes.code;
   const unminified = deobfuscated;
   const smartAnalysis = {
     webcrack: webRes,
     humanify: humRes,
-    jslinux: jslRes,
-    sandboxEval: sbRes
+    sandboxEval: sbRes,
   };
 
   const response = { base64Decoded, deobfuscated, unminified, smartAnalysis };
-  cache.set(key,response);
+  cache.set(key, response);
   res.status(200).json(response);
 }
