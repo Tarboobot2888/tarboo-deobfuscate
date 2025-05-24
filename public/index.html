@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TARBOO Deobfuscate</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+    body {
+      background: #0f0f14;
+      color: #00ff99;
+      font-family: 'Share Tech Mono', monospace;
+      margin: 0; padding: 20px;
+      display: flex; flex-direction: column; align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px #00ff99;
+    }
+    textarea {
+      background: #121212;
+      border: 1px solid #00ff99;
+      color: #00ff99;
+      width: 90vw;
+      max-width: 900px;
+      height: 220px;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 16px;
+      resize: vertical;
+      margin-bottom: 10px;
+      outline: none;
+    }
+    button {
+      background: #00ff99;
+      border: none;
+      color: #0f0f14;
+      font-weight: bold;
+      font-size: 18px;
+      padding: 12px 30px;
+      cursor: pointer;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #00cc7a;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 10px;
+    }
+    .tab {
+      cursor: pointer;
+      padding: 8px 18px;
+      border: 1px solid #00ff99;
+      border-radius: 6px;
+      background: #121212;
+      color: #00ff99;
+      transition: background 0.3s ease;
+    }
+    .tab.active, .tab:hover {
+      background: #00ff99;
+      color: #0f0f14;
+    }
+    .output {
+      background: #121212;
+      border: 1px solid #00ff99;
+      border-radius: 6px;
+      padding: 15px;
+      width: 90vw;
+      max-width: 900px;
+      min-height: 180px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>TARBOO Deobfuscate</h1>
+
+  <textarea id="inputCode" placeholder="ألصق كود Node.js المشفر هنا..."></textarea>
+  <button id="runBtn">فك التشفير</button>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="base64">Base64</div>
+    <div class="tab" data-tab="deobf">فك التمويه</div>
+    <div class="tab" data-tab="unmin">تنسيق الكود</div>
+  </div>
+
+  <pre id="base64" class="output"></pre>
+  <pre id="deobf" class="output" style="display:none;"></pre>
+  <pre id="unmin" class="output" style="display:none;"></pre>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const outputs = {
+    base64: document.getElementById('base64'),
+    deobf: document.getElementById('deobf'),
+    unmin: document.getElementById('unmin')
+  };
+
+  tabs.forEach(tab => {
+    tab.onclick = () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      for (const key in outputs) outputs[key].style.display = 'none';
+      outputs[tab.dataset.tab].style.display = 'block';
+    };
+  });
+
+  document.getElementById('runBtn').onclick = async () => {
+    const input = document.getElementById('inputCode').value.trim();
+    if (!input) {
+      alert('يرجى إدخال كود لفك التشفير');
+      return;
+    }
+    outputs.base64.textContent = 'جارٍ المعالجة...';
+    outputs.deobf.textContent = '';
+    outputs.unmin.textContent = '';
+
+    try {
+      const response = await fetch('/api/deobfuscate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({code: input})
+      });
+      const result = await response.json();
+
+      if (result.error) {
+        outputs.base64.textContent = `خطأ: ${result.error}`;
+        outputs.deobf.textContent = '';
+        outputs.unmin.textContent = '';
+      } else {
+        outputs.base64.textContent = result.base64Decoded;
+        outputs.deobf.textContent = result.deobfuscated;
+        outputs.unmin.textContent = result.unminified;
+
+        // افتح تبويب فك التمويه تلقائيًا
+        tabs.forEach(t => t.classList.remove('active'));
+        tabs[1].classList.add('active');
+        outputs.base64.style.display = 'none';
+        outputs.deobf.style.display = 'block';
+        outputs.unmin.style.display = 'none';
+      }
+    } catch (e) {
+      outputs.base64.textContent = 'حدث خطأ أثناء الاتصال بالخادم.';
+      outputs.deobf.textContent = '';
+      outputs.unmin.textContent = '';
+    }
+  };
+</script>
+
+</body>
+</html>
