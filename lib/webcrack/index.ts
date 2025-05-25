@@ -233,5 +233,4 @@ export async function webcrack(
   };
 }
 
-import deobfuscate from "./deobfuscate";
 export default deobfuscate;
