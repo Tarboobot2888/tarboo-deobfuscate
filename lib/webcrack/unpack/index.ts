@@ -4,10 +4,9 @@ import type * as m from '@codemod/matchers';
 import debug from 'debug';
 import { unpackBrowserify } from './browserify';
 import type { Bundle } from './bundle';
-import unpackWebpack4 from './webpack/unpack-webpack-4.js';
-import unpackWebpack5 from './webpack/unpack-webpack-5.js';
-import unpackWebpackChunk from './webpack/unpack-webpack-chunk.js';
-
+import unpackWebpack4 from './webpack/unpack-webpack-4';
+import unpackWebpack5 from './webpack/unpack-webpack-5';
+import unpackWebpackChunk from './webpack/unpack-webpack-chunk';
 export { Bundle } from './bundle';
 
 export function unpackAST(
