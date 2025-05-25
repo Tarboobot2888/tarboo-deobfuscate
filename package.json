@@ -21,7 +21,6 @@
     "@codemod/matchers": "^1.1.0",
     "commander": "^11.1.0",
     "debug": "^4.3.4",
-    "vm2": "^3.9.17"
   },
   "devDependencies": {
     "typescript": "5.1.6",
