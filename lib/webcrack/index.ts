@@ -4,7 +4,8 @@ import type * as t from '@babel/types';
 import type Matchers from '@codemod/matchers';
 import * as m from '@codemod/matchers';
 import debug from 'debug';
-import { join, normalize } from 'node:path';
+import path from 'path';
+import fs from 'fs/promises';
 import {
   applyTransform,
   applyTransformAsync,
@@ -41,7 +42,7 @@ import type { Bundle } from './unpack';
 import { unpackAST } from './unpack';
 import { isBrowser } from './utils/platform';
 
-export type { Sandbox } from './deobfuscate';
+export { type Sandbox } from './deobfuscate';
 export type { Plugin } from './plugin';
 
 type Matchers = typeof m;
@@ -175,12 +176,11 @@ export async function webcrack(
   return {
     code: outputCode,
     bundle,
-    async save(path) {
-      const { mkdir, writeFile } = await import('node:fs/promises');
-      path = normalize(path);
-      await mkdir(path, { recursive: true });
-      await writeFile(join(path, 'deobfuscated.js'), outputCode, 'utf8');
-      await bundle?.save(path);
+    async save(savePath) {
+      savePath = path.normalize(savePath);
+      await fs.mkdir(savePath, { recursive: true });
+      await fs.writeFile(path.join(savePath, 'deobfuscated.js'), outputCode, 'utf8');
+      await bundle?.save(savePath);
     },
   };
 }
