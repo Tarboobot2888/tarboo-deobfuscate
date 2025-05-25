@@ -11,11 +11,10 @@ import {
   applyTransforms,
   generate,
 } from './ast-utils';
-import type { Sandbox } from './deobfuscate';
-import {
-  default as deobfuscate,
+import deobfuscate, {
   createBrowserSandbox,
   createNodeSandbox,
+  type Sandbox,
 } from './deobfuscate';
 import debugProtection from './deobfuscate/debug-protection';
 import evaluateGlobals from './deobfuscate/evaluate-globals';
