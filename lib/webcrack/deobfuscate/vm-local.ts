@@ -70,3 +70,4 @@ export class VMDecoder {
     }
   }
 }
+export { createNodeSandbox as createLocalSandbox };
