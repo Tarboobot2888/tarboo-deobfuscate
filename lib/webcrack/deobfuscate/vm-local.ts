@@ -1,3 +1,4 @@
+// lib/webcrack/deobfuscate/vm-local.ts
 import type { NodePath } from '@babel/traverse';
 import type { CallExpression } from '@babel/types';
 import debug from 'debug';
@@ -8,13 +9,20 @@ import type { StringArray } from './string-array';
 
 export type Sandbox = (code: string) => Promise<unknown>;
 
-export function createLocalSandbox(): Sandbox {
+export function createNodeSandbox(): Sandbox {
   return async (code: string) => {
     try {
-      return eval(code);
+      // مخصص للعمل في Vercel بدون vm2
+      return Function(`"use strict"; return (${code})`)();
     } catch (err) {
-      throw new Error('Eval sandbox execution failed', { cause: err });
+      throw new Error('Local sandbox execution failed', { cause: err });
     }
+  };
+}
+
+export function createBrowserSandbox(): Sandbox {
+  return () => {
+    throw new Error('Custom Sandbox implementation required in browser.');
   };
 }
 
@@ -41,11 +49,9 @@ export class VMDecoder {
     const rotatorCode = rotator ? generate(rotator.node, generateOptions) : '';
     const decoderCode = decoders
       .map((decoder) => generate(decoder.path.node, generateOptions))
-      .join(';
-');
+      .join(';\n');
 
-    this.setupCode = [stringArrayCode, rotatorCode, decoderCode].join(';
-');
+    this.setupCode = [stringArrayCode, rotatorCode, decoderCode].join(';\n');
   }
 
   async decode(calls: NodePath<CallExpression>[]): Promise<unknown[]> {
