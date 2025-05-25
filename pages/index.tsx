@@ -1,6 +1,6 @@
 // pages/index.tsx
 import { useState, useEffect } from "react";
-import deobfuscateLocal from "../lib/webcrack-wrapper";
+import { deobfuscateLocal } from "../lib/webcrack-wrapper";
 import axios from "axios";
 import Link from "next/link";
 
