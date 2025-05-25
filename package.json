@@ -20,7 +20,7 @@
     "@babel/helper-validator-identifier": "^7.24.5",
     "@codemod/matchers": "^1.1.0",
     "commander": "^11.1.0",
-    "debug": "^4.3.4",
+    "debug": "^4.3.4"
   },
   "devDependencies": {
     "typescript": "5.1.6",
