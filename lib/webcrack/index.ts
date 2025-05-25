@@ -13,9 +13,10 @@ import {
 } from './ast-utils';
 import deobfuscate, {
   createBrowserSandbox,
-  createNodeSandbox,
+  createLocalSandbox,
   type Sandbox,
 } from './deobfuscate';
+import { createLocalSandbox } from './deobfuscate/vm-local';
 import debugProtection from './deobfuscate/debug-protection';
 import evaluateGlobals from './deobfuscate/evaluate-globals';
 import mergeObjectAssignments from './deobfuscate/merge-object-assignments';
@@ -42,6 +43,7 @@ import { unpackAST } from './unpack';
 import { isBrowser } from './utils/platform';
 
 export { type Sandbox } from './deobfuscate';
+import { createLocalSandbox } from './deobfuscate/vm-local';
 export type { Plugin } from './plugin';
 
 type Matchers = typeof m;
@@ -118,7 +120,7 @@ function mergeOptions(options: Options): asserts options is Required<Options> {
     plugins: options.plugins ?? {},
     mappings: () => ({}),
     onProgress: () => {},
-    sandbox: isBrowser() ? createBrowserSandbox() : createNodeSandbox(),
+    sandbox: isBrowser() ? createBrowserSandbox() : createLocalSandbox(),
     ...options,
   };
   Object.assign(options, mergedOptions);
