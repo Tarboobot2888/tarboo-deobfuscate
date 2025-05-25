@@ -41,7 +41,7 @@ import type { Bundle } from './unpack';
 import { unpackAST } from './unpack';
 import { isBrowser } from './utils/platform';
 
-export { type Sandbox } from './deobfuscate';
+export type { Sandbox } from './deobfuscate';
 export type { Plugin } from './plugin';
 
 type Matchers = typeof m;
