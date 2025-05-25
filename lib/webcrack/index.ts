@@ -13,9 +13,9 @@ import {
 } from './ast-utils';
 import deobfuscate, {
   createBrowserSandbox,
-  createLocalSandbox,
   type Sandbox,
 } from './deobfuscate';
+import { createLocalSandbox } from './deobfuscate/vm-local';
 import debugProtection from './deobfuscate/debug-protection';
 import evaluateGlobals from './deobfuscate/evaluate-globals';
 import mergeObjectAssignments from './deobfuscate/merge-object-assignments';
