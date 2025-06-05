@@ -1,7 +1,7 @@
 import { parse } from '@babel/parser';
 import generate from '@babel/generator';
 import deobfuscate from './webcrack';
-import { createLocalSandbox } from './webcrack/deobfuscate/vm-local';
+import { createNodeSandbox } from './webcrack/deobfuscate/vm';
 
 type TransformState = {
   changes: number;
@@ -15,7 +15,7 @@ export async function deobfuscateLocal(code: string): Promise<string> {
     });
 
     const state: TransformState = { changes: 0 };
-    const sandbox = createLocalSandbox();
+    const sandbox = createNodeSandbox();
 
     await deobfuscate.run(ast, state, sandbox);
 
