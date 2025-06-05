@@ -1,3 +1,4 @@
+
 import type { ParseResult } from '@babel/parser';
 import { parse } from '@babel/parser';
 import type * as t from '@babel/types';
@@ -49,62 +50,17 @@ type Matchers = typeof m;
 export interface WebcrackResult {
   code: string;
   bundle: Bundle | undefined;
-  /**
-   * Save the deobfuscated code and the extracted bundle to the given directory.
-   * @param path Output directory
-   */
-  save(path: string): Promise<void>;
 }
 
 export interface Options {
-  /**
-   * Decompile react components to JSX.
-   * @default true
-   */
   jsx?: boolean;
-  /**
-   * Extract modules from the bundle.
-   * @default true
-   */
   unpack?: boolean;
-  /**
-   * Deobfuscate the code.
-   * @default true
-   */
   deobfuscate?: boolean;
-  /**
-   * Unminify the code. Required for some of the deobfuscate/unpack/jsx transforms.
-   * @default true
-   */
   unminify?: boolean;
-  /**
-   * Mangle variable names.
-   * @default false
-   */
   mangle?: boolean | ((id: string) => boolean);
-  /**
-   * Run AST transformations after specific stages
-   */
   plugins?: Partial<Record<Stage, Plugin[]>>;
-  /**
-   * Assigns paths to modules based on the given matchers.
-   * This will also rewrite `require()` calls to use the new paths.
-   *
-   * @example
-   * ```js
-   * m => ({
-   *   './utils/color.js': m.regExpLiteral('^#([0-9a-f]{3}){1,2}$')
-   * })
-   * ```
-   */
   mappings?: (m: Matchers) => Record<string, m.Matcher<unknown>>;
-  /**
-   * Function that executes a code expression and returns the result (typically from the obfuscator).
-   */
   sandbox?: Sandbox;
-  /**
-   * @param progress Progress in percent (0-100)
-   */
   onProgress?: (progress: number) => void;
 }
 
@@ -194,13 +150,11 @@ export async function webcrack(
           mangle,
           typeof options.mangle === 'boolean' ? () => true : options.mangle,
         )),
-    // TODO: Also merge unminify visitor (breaks selfDefending/debugProtection atm)
     (options.deobfuscate || options.jsx) &&
       (() => {
         applyTransforms(
           ast,
           [
-            // Have to run this after unminify to properly detect it
             options.deobfuscate ? [selfDefending, debugProtection] : [],
             options.jsx ? [jsx, jsxNew] : [],
           ].flat(),
@@ -209,8 +163,6 @@ export async function webcrack(
     options.deobfuscate &&
       (() => applyTransforms(ast, [mergeObjectAssignments, evaluateGlobals])),
     () => (outputCode = generate(ast)),
-    // Unpacking modifies the same AST and may result in imports not at top level
-    // so the code has to be generated before
     options.unpack && (() => (bundle = unpackAST(ast, options.mappings(m)))),
     plugins.afterUnpack && (() => runPlugins(ast, plugins.afterUnpack!, state)),
   ].filter(Boolean) as (() => unknown)[];
@@ -223,13 +175,6 @@ export async function webcrack(
   return {
     code: outputCode,
     bundle,
-    async save(path) {
-      const { mkdir, writeFile } = await import('node:fs/promises');
-      path = normalize(path);
-      await mkdir(path, { recursive: true });
-      await writeFile(join(path, 'deobfuscated.js'), outputCode, 'utf8');
-      await bundle?.save(path);
-    },
   };
 }
 
