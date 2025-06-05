@@ -15,10 +15,12 @@ import inlineDecodedStrings from './inline-decoded-strings';
 import inlineDecoderWrappers from './inline-decoder-wrappers';
 import inlineObjectProps from './inline-object-props';
 import { findStringArray } from './string-array';
-import type { Sandbox } from './vm-local';
-import { VMDecoder, createBrowserSandbox, createNodeSandbox } from './vm-local';
+import type { Sandbox } from './vm';
+import { VMDecoder, createBrowserSandbox, createNodeSandbox } from './vm';
 
 export { createBrowserSandbox, createNodeSandbox, type Sandbox };
+
+// https://astexplorer.net/#/gist/b1018df4a8daebfcb1daf9d61fe17557/4ff9ad0e9c40b9616956f17f59a2d9888cd62a4f
 
 export default {
   name: 'deobfuscate',
